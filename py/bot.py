@@ -1,5 +1,4 @@
 import telebot
-import sys
 import os
 import pathlib
 import random
@@ -7,8 +6,8 @@ import logging
 
 import bot_key
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-bot = telebot.TeleBot(bot_key.KEY)
+
+bot = telebot.TeleBot(bot_key.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
