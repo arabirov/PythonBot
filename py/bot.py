@@ -12,7 +12,7 @@ bot = telebot.TeleBot(bot_key.KEY)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-
+# -------------------------- C O M M A N D S --------------------------
 @bot.message_handler(commands=['start'])
 def start_message(message):
     bot.send_message(message.chat.id, "Hi! You sent me /start.")
@@ -27,7 +27,7 @@ def secret_message(message):
         image.close()
         logging.info("He-he ( ͡° ͜ʖ ͡°)")
 
-
+# -------------------------- M E S S A G E S --------------------------
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
     if message.text.lower() == "hi":
