@@ -2,9 +2,10 @@ import telebot
 import sys
 import os
 import pathlib
+import bot_key
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot(bot_key.key)
 @bot.message_handler(commands=['start'])
 def start_message(message):
     bot.send_message(message.chat.id, "Hi! You sent me /start.")
