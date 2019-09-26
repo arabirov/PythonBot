@@ -2,21 +2,30 @@ import telebot
 import sys
 import os
 import pathlib
+import random
+import logging
+
 import bot_key
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-bot = telebot.TeleBot(bot_key.key)
+bot = telebot.TeleBot(bot_key.KEY)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
 @bot.message_handler(commands=['start'])
 def start_message(message):
     bot.send_message(message.chat.id, "Hi! You sent me /start.")
 
 
 @bot.message_handler(commands=['secret'])
-def ahegao_message(message):
-    if pathlib.Path("../images/image.jpg").exists():
-        image = open("../images/image.jpg", 'rb')
-        bot.send_photo(chat_id=message.chat.id, photo=image, caption="Here is it ( ͡° ͜ʖ ͡°)")
+def secret_message(message):
+    if pathlib.Path("../images/").exists():
+        file = (os.path.join("../images", random.choice(os.listdir("../images"))))
+        image = open(file, 'rb')
+        bot.send_photo(chat_id=message.chat.id, photo=image, caption="Here it is ( ͡° ͜ʖ ͡°)")
         image.close()
+        logging.info("He-he ( ͡° ͜ʖ ͡°)")
 
 
 @bot.message_handler(content_types=['text'])
