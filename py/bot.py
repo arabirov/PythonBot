@@ -29,7 +29,7 @@ def secret_message(message):
         logging.info("He-he ( ͡° ͜ʖ ͡°)")
 
 
-@bot.message_handler(commands=['fibo'], content_types=['text'], regexp="^\d*$")
+@bot.message_handler(commands=['fibo'], content_types=['text'])
 def fibo_message(message):
     if extract_arg(message) > 0:
         bot.send_message(message.chat.id, f"Hi! You sent me /fibo. For your number {extract_arg(message)}"
