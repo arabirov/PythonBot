@@ -3,6 +3,7 @@ import os
 import pathlib
 import random
 import logging
+import re
 
 import bot_key
 import my_fibonacci
@@ -10,7 +11,7 @@ import my_fibonacci
 bot = telebot.TeleBot(bot_key.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
+fibo_regexp = re.compile(r"^\d+$")
 
 # -------------------------- C O M M A N D S --------------------------
 @bot.message_handler(commands=['start'])
@@ -28,16 +29,24 @@ def secret_message(message):
         logging.info("He-he ( ͡° ͜ʖ ͡°)")
 
 
-@bot.message_handler(commands=['fibo'], content_types=['text'])
+@bot.message_handler(commands=['fibo'], content_types=['text'], regexp="^\d*$")
 def fibo_message(message):
-    bot.send_message(message.chat.id, f"Hi! You sent me /fibo. For your number {extract_arg(message)}"
-                                      f" sequence will be : {my_fibonacci.fibonacci(extract_arg(message))} ")
+    if extract_arg(message) > 0:
+        bot.send_message(message.chat.id, f"Hi! You sent me /fibo. For your number {extract_arg(message)}"
+                                          f" sequence will be : {my_fibonacci.fibonacci(extract_arg(message))} ")
+    else:
+        bot.send_message(message.chat.id, f"{my_fibonacci.fibonacci(extract_arg(message))}")
 
 
-def extract_arg(message):
-    for number in message.text.split():
-        if number.isdigit():
-            return int(number)
+def extract_arg(message):  # ----- S H I T C 0 D E -----
+    argument = message.text.partition('/fibo ')
+    if argument[2].lstrip('-').isdigit():
+        if int(argument[2]) > 0:
+            return int(argument[2])
+        else:
+            return 0
+    else:
+        return 0
 
 
 # -------------------------- M E S S A G E S --------------------------

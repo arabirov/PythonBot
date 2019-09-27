@@ -6,6 +6,8 @@ def fibonacci(a):
     c = 0
     d = 1
     i = 0
+    if a == 0:
+        return 'Error, please use only positive digits that > 0'
     while i < a:
         b[i:i + 1] = [c]
         c, d = d, c + d
