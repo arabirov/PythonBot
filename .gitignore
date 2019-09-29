@@ -125,4 +125,4 @@ dmypy.json
 .pyre/
 
 # Bot key
-py/bot_key.py
+py/constants.py

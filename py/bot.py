@@ -5,10 +5,16 @@ import random
 import logging
 import re
 
-import bot_key
+import constants
 import my_fibonacci
 
-bot = telebot.TeleBot(bot_key.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
+from telebot import apihelper
+
+bot = telebot.TeleBot(constants.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
+try:
+    apihelper.proxy = constants.PROXY
+except AttributeError:
+    pass
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 fibo_regexp = re.compile(r"^\d+$")
@@ -49,6 +55,11 @@ def extract_arg(message):  # ----- S H I T C 0 D E -----
         return 0
 
 
+@bot.message_handler(commands=['stop'])
+def stop_message(message):
+    bot.stop_polling()
+
+
 # -------------------------- M E S S A G E S --------------------------
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
@@ -60,4 +71,7 @@ def text_handler(message):
         bot.send_message(message.chat.id, "I don't know what does it mean :( Please use 'Hi'/'Bye' or /start")
 
 
-bot.polling()
+try:
+    bot.polling()
+finally:
+    logging.info("Bot stopped.")
