@@ -50,7 +50,9 @@ def fibo_message(message):
 
 @bot.message_handler(commands=["wwg"])
 def wwg_message(message):
-    bot.send_message(message.chat.id, poi_id_message(extract_arg(message)))
+    poi_message = poi_id_message(extract_arg(message))
+    # bot.send_message(message.chat.id, poi_message[0], parse_mode="HTML")
+    bot.send_photo(message.chat.id, poi_message[1])
 
 
 # -------------------------- M E S S A G E S --------------------------
