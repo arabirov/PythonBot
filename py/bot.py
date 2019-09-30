@@ -3,21 +3,22 @@ import os
 import pathlib
 import random
 import logging
-import re
 
-import constants
-import my_fibonacci
+from py import constants
+from py import my_fibonacci
+from py.api import *
+from py.argument import *
+from py.poi_messages import *
 
 from telebot import apihelper
 
-bot = telebot.TeleBot(constants.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
 try:
     apihelper.proxy = constants.PROXY
 except AttributeError:
     pass
+bot = telebot.TeleBot(constants.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-fibo_regexp = re.compile(r"^\d+$")
 
 # -------------------------- C O M M A N D S --------------------------
 @bot.message_handler(commands=['start'])
@@ -33,31 +34,23 @@ def secret_message(message):
         bot.send_photo(chat_id=message.chat.id, photo=image, caption="Here it is ( ͡° ͜ʖ ͡°)")
         image.close()
         logging.info("He-he ( ͡° ͜ʖ ͡°)")
+    else:
+        bot.send_message(message.chat.it, r"Sorry, out of images ¯\_(ツ)_/¯")
 
 
 @bot.message_handler(commands=['fibo'], content_types=['text'])
 def fibo_message(message):
-    if extract_arg(message) > 0:
-        bot.send_message(message.chat.id, f"Hi! You sent me /fibo. For your number {extract_arg(message)}"
-                                          f" sequence will be : {my_fibonacci.fibonacci(extract_arg(message))} ")
+    argument = extract_arg(message)
+    if int(argument) > 0:
+        bot.send_message(message.chat.id, f"Hi! You sent me /fibo. For your number {int(argument)}"
+                                          f" sequence will be : {my_fibonacci.fibonacci(int(argument))} ")
     else:
-        bot.send_message(message.chat.id, f"{my_fibonacci.fibonacci(extract_arg(message))}")
+        bot.send_message(message.chat.id, f"{my_fibonacci.fibonacci(int(argument))}")
 
 
-def extract_arg(message):  # ----- S H I T C 0 D E -----
-    argument = message.text.partition('/fibo ')
-    if argument[2].lstrip('-').isdigit():
-        if int(argument[2]) > 0:
-            return int(argument[2])
-        else:
-            return 0
-    else:
-        return 0
-
-
-@bot.message_handler(commands=['stop'])
-def stop_message(message):
-    bot.stop_polling()
+@bot.message_handler(commands=["wwg"])
+def wwg_message(message):
+    bot.send_message(message.chat.id, poi_id_message(extract_arg(message)))
 
 
 # -------------------------- M E S S A G E S --------------------------
