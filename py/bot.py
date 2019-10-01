@@ -4,9 +4,7 @@ import pathlib
 import random
 import logging
 
-from py import constants
 from py import my_fibonacci
-from py.api import *
 from py.argument import *
 from py.poi_messages import *
 
@@ -51,8 +49,10 @@ def fibo_message(message):
 @bot.message_handler(commands=["wwg"])
 def wwg_message(message):
     poi_message = poi_id_message(extract_arg(message))
-    # bot.send_message(message.chat.id, poi_message[0], parse_mode="HTML")
-    bot.send_photo(message.chat.id, poi_message[1])
+    try:
+        bot.send_photo(message.chat.id, poi_message[1], caption=poi_message[0], parse_mode="HTML")
+    except telebot.apihelper.ApiException:
+        bot.send_message(message.chat.id, poi_message)
 
 
 # -------------------------- M E S S A G E S --------------------------
