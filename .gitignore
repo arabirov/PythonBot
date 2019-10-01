@@ -126,3 +126,6 @@ dmypy.json
 
 # Bot key
 py/constants.py
+
+# Handler saves
+py/.handler-saves
