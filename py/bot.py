@@ -28,7 +28,11 @@ if not pathlib.Path(constants.DB_PATH).exists():
         new_base = sqlite3.connect(constants.DB_PATH)
         new_base_cursor = new_base.cursor()
         logging.info("Creating tables...")
-        new_base.execute("""CREATE TABLE "users" ("chat_id"	INTEGER NOT NULL UNIQUE,"name"	TEXT NOT NULL,"age"	INTEGER);""")
+        new_base.execute("""CREATE TABLE "users" (
+        "chat_id"	INTEGER NOT NULL UNIQUE,
+        "name"	TEXT NOT NULL,
+        "age"	INTEGER)
+        ;""")
         new_base.commit()
         logging.info("Done!")
         new_base_cursor.close()
@@ -170,7 +174,6 @@ def whoami_save(message):
 def text_handler(message):
     if message.text.lower() == "hi":
         bot.send_message(message.chat.id, "Hello!")
-        print(message.chat.id)
     elif message.text.lower() == "bye":
         bot.send_message(message.chat.id, "Goodbye!")
     else:
