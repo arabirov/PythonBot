@@ -3,6 +3,7 @@ import os
 import pathlib
 import random
 import logging
+import sqlite3
 
 from py import my_fibonacci
 from py.argument import *
@@ -18,6 +19,31 @@ bot = telebot.TeleBot(constants.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+if not pathlib.Path(constants.DB_PATH).exists():
+    if not pathlib.Path(constants.DB_FOLDER).exists():
+        os.mkdir(constants.DB_FOLDER)
+        logging.info("DB directory created.")
+    try:
+        logging.info("DB does not exist, creating...")
+        new_base = sqlite3.connect(constants.DB_PATH)
+        new_base_cursor = new_base.cursor()
+        logging.info("Creating tables...")
+        new_base.execute("""CREATE TABLE "users" ("chat_id"	INTEGER NOT NULL UNIQUE,"name"	TEXT NOT NULL,"age"	INTEGER);""")
+        new_base.commit()
+        logging.info("Done!")
+        new_base_cursor.close()
+        new_base.close()
+    except sqlite3.OperationalError:
+        logging.info("Can't create DB! Check your permissions and existence of ../db/ folder.")
+
+if pathlib.Path(constants.DB_PATH).exists():  # TODO Move db functionality to separate file
+    logging.info("DB exists, trying to connect...")
+    db_conn = sqlite3.connect(constants.DB_PATH, check_same_thread=False)
+    logging.info("Connected!") if db_conn else logging.info("Error occurred while connecting to DB!")
+    db_cursor = db_conn.cursor()
+else:
+    logging.info("Can't connect to db.")
+
 
 class User:
     user_dict = {}
@@ -25,6 +51,7 @@ class User:
     def __init__(self, name):
         self.name = name
         self.age = None
+
 
 # -------------------------- C O M M A N D S --------------------------
 @bot.message_handler(commands=['start'])
@@ -73,8 +100,22 @@ def wwg_message(message):
 
 @bot.message_handler(commands=['whoami'])
 def whoami(message):
-    msg = bot.reply_to(message, "Well, hi there. What is your name?")
-    bot.register_next_step_handler(msg, whoami_name)
+    chat_id = message.chat.id
+    try:
+        check_acq = db_cursor.execute("SELECT * FROM users WHERE chat_id=?", (chat_id,)).fetchall()
+    except NameError:
+        msg = bot.reply_to(message, "Well, hi there. What is your name?")
+        bot.register_next_step_handler(msg, whoami_name)
+    else:
+        try:
+            user_db_id = check_acq[0][0]
+            user_db_name = check_acq[0][1]
+            user_db_age = check_acq[0][2]
+            if user_db_id == chat_id:
+                bot.reply_to(message, f"Hey, I remember you! You are {user_db_name} that {user_db_age} years old.")
+        except IndexError:
+            msg = bot.reply_to(message, "Well, hi there. What is your name?")
+            bot.register_next_step_handler(msg, whoami_name)
 
 
 def whoami_name(message):
@@ -97,26 +138,39 @@ def whoami_age(message):
     user.age = age
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
     markup.add("Yes, please", "No, thanks")
-    msg = bot.reply_to(message, f"Nice to meet you, {user.name}, that {str(user.age)} years old. Should I remember that?", reply_markup=markup)
+    msg = bot.reply_to(message,
+                       f"Nice to meet you, {user.name}, that {str(user.age)} years old. Should I remember that?",
+                       reply_markup=markup)
     bot.register_next_step_handler(msg, whoami_save)
 
 
 def whoami_save(message):
     chat_id = message.chat.id
     answer = message.text
+    user = User.user_dict[chat_id]
     if answer == 'Yes, please':
         bot.send_message(chat_id, "Saved")
+        try:
+            user_insert = "INSERT INTO 'users' ('chat_id', 'name', 'age') VALUES (?, ?, ?);"
+            user_data = (chat_id, user.name, user.age)
+            db_cursor.execute(user_insert, user_data)
+            db_conn.commit()
+        except NameError:
+            logging.info("Someone tried to save his information, but DB is down, sadly :(")
+            pass
     elif answer == 'No, thanks':
         bot.send_message(chat_id, "Ok, bye")
     else:
         msg = bot.reply_to(message, "Please, use buttons")
         bot.register_next_step_handler(msg, whoami_save)
 
+
 # -------------------------- M E S S A G E S --------------------------
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
     if message.text.lower() == "hi":
         bot.send_message(message.chat.id, "Hello!")
+        print(message.chat.id)
     elif message.text.lower() == "bye":
         bot.send_message(message.chat.id, "Goodbye!")
     else:
@@ -127,4 +181,10 @@ bot.enable_save_next_step_handlers(delay=2)
 try:
     bot.polling()
 finally:
+    try:
+        db_cursor.close()
+        db_conn.close()
+        logging.info("Connection closed.")
+    except NameError:
+        logging.info("Can't close connection, because it does not exist.")
     logging.info("Bot stopped.")

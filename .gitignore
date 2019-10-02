@@ -129,3 +129,6 @@ py/constants.py
 
 # Handler saves
 py/.handler-saves
+
+# DB
+db/
