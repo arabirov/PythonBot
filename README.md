@@ -10,4 +10,4 @@ Bot can handle next commands:
 - <b>/whoami</b> - allows to add user to DB;
 
 ## Text
-Bot can answer to "Hi" and "Bye" message. Any other words can also be handled.
+Bot can answer to "Hi" and "Bye" messages. Any other words can also be handled.
