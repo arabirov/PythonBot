@@ -15,6 +15,7 @@ try:
     apihelper.proxy = constants.PROXY
 except AttributeError:
     pass
+
 bot = telebot.TeleBot(constants.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -31,9 +32,10 @@ def start_message(message):
 
 @bot.message_handler(commands=['help'])
 def start_message(message):
+    bot.send_message(message.chat.id, command_re)
     bot.send_message(message.chat.id, "List of commands:\n<b>/start</b> - basic command\n<b>/fibo</b> - sends with "
                                       "numeric argument to retrieve fibonacci sequence\n<b>/wwg</b> - sends with "
-                                      "numeric to retrieve POI info",
+                                      "numeric to retrieve POI info\n<b>/whoami</b> - allows to add user to DB",
                      parse_mode="HTML")
 
 

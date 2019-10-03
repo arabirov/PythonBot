@@ -3,7 +3,7 @@ import pathlib
 import logging
 import sqlite3
 
-from py.poi_messages import *
+from py.constants import DB_FOLDER, DB_PATH
 
 
 class User:
@@ -19,31 +19,31 @@ class Database:
     db_conn = ''
 
     def database_create(self):
-        if not pathlib.Path(constants.DB_PATH).exists():
-            if not pathlib.Path(constants.DB_FOLDER).exists():
-                os.mkdir(constants.DB_FOLDER)
+        if not pathlib.Path(DB_PATH).exists():
+            if not pathlib.Path(DB_FOLDER).exists():
+                os.mkdir(DB_FOLDER)
                 logging.info("DB directory created.")
             try:
                 logging.info("DB does not exist, creating...")
-                new_base = sqlite3.connect(constants.DB_PATH)
-                new_base_cursor = new_base.cursor()
+                self.db_conn = sqlite3.connect(DB_PATH)
+                self.db_cursor = self.db_conn.cursor()
                 logging.info("Creating tables...")
-                new_base.execute("""CREATE TABLE "users" (
+                self.db_conn.execute("""CREATE TABLE "users" (
         "chat_id"	INTEGER NOT NULL UNIQUE,
         "name"	TEXT NOT NULL,
         "age"	INTEGER)
         ;""")
-                new_base.commit()
+                self.db_conn.commit()
                 logging.info("Done!")
-                new_base_cursor.close()
-                new_base.close()
+                self.db_cursor.close()
+                self.db_conn.close()
             except sqlite3.OperationalError:
                 logging.info("Can't create DB! Check your permissions and existence of ../db/ folder.")
 
     def database_connect(self):
-        if pathlib.Path(constants.DB_PATH).exists():
+        if pathlib.Path(DB_PATH).exists():
             logging.info("DB exists, trying to connect...")
-            self.db_conn = sqlite3.connect(constants.DB_PATH, check_same_thread=False)
+            self.db_conn = sqlite3.connect(DB_PATH, check_same_thread=False)
             logging.info("Connected!") if self.db_conn else logging.info("Error occurred while connecting to DB!")
             self.db_cursor = self.db_conn.cursor()
         else:
