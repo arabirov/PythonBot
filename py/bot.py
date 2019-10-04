@@ -13,8 +13,11 @@ from py.database import Database, User
 from py.constants import KEY
 from py.proxy import connect as connect_to_proxy
 
-connect_to_proxy()
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 bot = telebot.TeleBot(KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
+connect_to_proxy()
 database = Database()
 
 database.create()
