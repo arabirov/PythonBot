@@ -4,25 +4,21 @@ import pathlib
 import random
 import logging
 
-from py import my_fibonacci
-from py.argument import *
-from py.poi_messages import *
+from telebot import types
+
+from py.my_fibonacci import fibonacci
+from py.argument import command_re, extract_arg
+from py.poi_messages import poi_id_message
 from py.database import Database, User
+from py.constants import KEY
+from py.proxy import connect as connect_to_proxy
 
-from telebot import apihelper, types
-
-try:
-    apihelper.proxy = constants.PROXY
-except AttributeError:
-    pass
-
-bot = telebot.TeleBot(constants.KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+connect_to_proxy()
+bot = telebot.TeleBot(KEY)  # ALWAYS REMEMBER TO ADD KEY MANUALLY
 database = Database()
 
-database.database_create()
-database.database_connect()
+database.create()
+database.connect()
 
 
 @bot.message_handler(commands=['start'])
@@ -56,9 +52,9 @@ def fibo_message(message):
     argument = extract_arg(message)
     if int(argument) > 0:
         bot.send_message(message.chat.id, f"Hi! You sent me /fibo. For your number {int(argument)}"
-                                          f" sequence will be : {my_fibonacci.fibonacci(int(argument))} ")
+                                          f" sequence will be : {fibonacci(int(argument))} ")
     else:
-        bot.send_message(message.chat.id, f"{my_fibonacci.fibonacci(int(argument))}")
+        bot.send_message(message.chat.id, f"{fibonacci(int(argument))}")
 
 
 @bot.message_handler(commands=['wwg'])
@@ -73,7 +69,7 @@ def wwg_message(message):
 @bot.message_handler(commands=['whoami'])
 def whoami(message):
     chat_id = message.chat.id
-    user_check = database.database_check_user(chat_id)
+    user_check = database.check_user(chat_id)
     if user_check[0]:
         bot.reply_to(message, user_check[1])
     if not user_check[0]:
@@ -113,7 +109,7 @@ def whoami_save(message):
     user = User.user_dict[chat_id]
     if answer == 'Yes, please':
         bot.send_message(chat_id, "Saved")
-        database.database_add_user(chat_id, user.name, user.age)
+        database.add_user(chat_id, user.name, user.age)
     elif answer == 'No, thanks':
         bot.send_message(chat_id, "Ok, bye")
     else:
@@ -136,5 +132,5 @@ bot.enable_save_next_step_handlers(delay=2)
 try:
     bot.polling()
 finally:
-    database.database_close_connection()
+    database.close_connection()
     logging.info("Bot stopped.")

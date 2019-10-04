@@ -1,4 +1,4 @@
-from py.api import *
+from py.api import get_poi_by_id
 import requests
 
 

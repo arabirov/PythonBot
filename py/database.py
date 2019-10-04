@@ -18,7 +18,7 @@ class Database:
     db_cursor = ''
     db_conn = ''
 
-    def database_create(self):
+    def create(self):
         if not pathlib.Path(DB_PATH).exists():
             if not pathlib.Path(DB_FOLDER).exists():
                 os.mkdir(DB_FOLDER)
@@ -40,7 +40,7 @@ class Database:
             except sqlite3.OperationalError:
                 logging.info("Can't create DB! Check your permissions and existence of ../db/ folder.")
 
-    def database_connect(self):
+    def connect(self):
         if pathlib.Path(DB_PATH).exists():
             logging.info("DB exists, trying to connect...")
             self.db_conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -49,7 +49,7 @@ class Database:
         else:
             logging.info("Can't connect to db.")
 
-    def database_check_user(self, chat_id):
+    def check_user(self, chat_id):
         try:
             check_acq = self.db_cursor.execute("SELECT * FROM users WHERE chat_id=?", (chat_id,)).fetchall()
         except NameError:
@@ -64,7 +64,7 @@ class Database:
             except IndexError:
                 return False, "Well, hi there. What is your name?"
 
-    def database_add_user(self, chat_id, name, age):
+    def add_user(self, chat_id, name, age):
         try:
             user_insert = "INSERT INTO 'users' ('chat_id', 'name', 'age') VALUES (?, ?, ?);"
             user_data = (chat_id, name, age)
@@ -74,7 +74,7 @@ class Database:
             logging.info("Someone tried to save his information, but DB is down, sadly :(")
             pass
 
-    def database_close_connection(self):
+    def close_connection(self):
         try:
             self.db_cursor.close()
             self.db_conn.close()
